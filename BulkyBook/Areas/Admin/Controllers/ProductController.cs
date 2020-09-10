@@ -158,11 +158,16 @@ namespace BulkyBook.Areas.Admin.Controllers
 
             string webRootPath = _hostEnvironment.WebRootPath;
             // this is an edit and we need to remove old image
-            var imagePath = Path.Combine(webRootPath, objFromDb.ImageUrl.TrimStart('\\'));
-            if (System.IO.File.Exists(imagePath))
+
+            if(objFromDb.ImageUrl != null)
             {
-                System.IO.File.Delete(imagePath);
+                var imagePath = Path.Combine(webRootPath, objFromDb.ImageUrl.TrimStart('\\'));
+                if (System.IO.File.Exists(imagePath))
+                {
+                    System.IO.File.Delete(imagePath);
+                }
             }
+            
             _unitOfWork.Product.Remove(objFromDb);
             _unitOfWork.Save();
             return Json(new { success = true, message = "Delete successfull." });            
