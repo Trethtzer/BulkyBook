@@ -1,5 +1,8 @@
 ﻿@model BulkyBook.Models.ViewModels.OrderDetailsVM
 @using BulkyBook.Utility
+@using Microsoft.Extensions.Options
+
+@inject IOptions<BulkyBook.Utility.StripeSettings> Stripe 
 
 <form method="post">
     <input hidden asp-for="OrderHeader.Id" />
@@ -236,10 +239,10 @@
                                     <a asp-action="StartProcessing" asp-route-id="@Model.OrderHeader.Id" class="btn btn-primary form-control">Start Processing</a>
                                 }
                                 @if (Model.OrderHeader.OrderStatus == SD.StatusInProcess)
-                                {                                    
-                                    <input type="submit" value="Ship Order" onclick="return validateInput()" 
-                                           class="btn btn-primary form-control" formaction="/Admin/Order/ShipOrder" 
-                                           formmethod="post"/>
+                                {
+                                    <input type="submit" value="Ship Order" onclick="return validateInput()"
+                                           class="btn btn-primary form-control" formaction="/Admin/Order/ShipOrder"
+                                           formmethod="post" />
                                 }
                             }
                             else
@@ -247,9 +250,30 @@
                                 <label class="btn btn-primary form-control">@Model.OrderHeader.OrderStatus</label>
                             }
 
-                            @if ((User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee)) 
-                                && Model.OrderHeader.OrderStatus != SD.StatusRefunded 
-                                && Model.OrderHeader.OrderStatus != SD.StatusCancelled)
+                            @{ 
+                                var OrderTotalForStripe = Model.OrderHeader.OrderTotal * 100;
+                            }
+                            @if (Model.OrderHeader.State == SD.PaymentStatusDelayedPayment && Model.OrderHeader.OrderStatus == SD.StatusShipped)
+                            {
+                                <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                                        data-key="@Stripe.Value.PublishableKey"
+                                        data-amount="@OrderTotalForStripe"
+                                        data-name="Bulky Book"
+                                        data-label="Place Order"
+                                        data-description="Get Books, For Less"
+                                        data-locale="auto"
+                                        data-allow-remember-me="false"
+                                        data-image="https://stripe.com/img/documentation/checkout/marketplace.png">
+                                </script>
+                                <script>
+                                    document.getElementsByClassName("stripe-button-e1")[0].style.display = 'none';
+                                </script>
+                                <button type="submit" value="Place Order" class="btn btn-success form-control">Pay now</button>
+                            }
+
+                            @if ((User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+                               && Model.OrderHeader.OrderStatus != SD.StatusRefunded
+                               && Model.OrderHeader.OrderStatus != SD.StatusCancelled)
                             {
                                 <div class="pt-2">
                                     <a asp-action="CancelOrder" asp-route-id="@Model.OrderHeader.Id" class="btn btn-danger form-control"> Cancel Order </a>
