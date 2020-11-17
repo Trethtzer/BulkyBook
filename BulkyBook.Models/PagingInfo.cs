@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BulkyBook.Models
 {
-    class PagingInfo
+    public class PagingInfo
     {
         public int TotalItem { get; set; }
         public int ItemsPerPage { get; set; }
