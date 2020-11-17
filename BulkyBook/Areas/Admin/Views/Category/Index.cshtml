@@ -60,6 +60,21 @@
     }
 </div>
 
+@section Scripts{ 
+    <script>
+        function Delete(url) {
+            $.ajax({
+                type: 'DELETE',
+                url: url,
+                success: function (data) {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+}
+
+
 @*
 <div class="p-4 border rounded">
     <table id="tblData" class="table table-striped table-bordered" style="width:100%">
